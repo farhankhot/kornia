@@ -327,6 +327,18 @@
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">dist_matrix</span>
 
 
+<span class="k">def</span> <span class="nf">_no_match</span><span class="p">(</span><span class="n">dm</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+    <span class="sd">"""Helper function, which output empty tensors.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">            - Descriptor distance of matching descriptors, shape of :math:`(0, 1)`.</span>
+<span class="sd">            - Long tensor indexes of matching descriptors in desc1 and desc2, shape of :math:`(0, 2)`.</span>
+<span class="sd">    """</span>
+    <span class="n">dists</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">dm</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dm</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">dm</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dists</span><span class="p">,</span> <span class="n">idxs</span>
+
+
 <span class="k">def</span> <span class="nf">get_adalam_default_config</span><span class="p">():</span>
     <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">'area_ratio'</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>  <span class="c1"># Ratio between seed circle area and image area. Higher values produce more seeds with smaller neighborhoods.    # noqa: E501</span>
@@ -547,6 +559,8 @@
                     <span class="s2">"Please either provide orientations or set 'orientation_difference_threshold' to None to disable orientations filtering"</span>  <span class="c1"># noqa: E501</span>
                 <span class="p">)</span>
         <span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">o1</span><span class="p">,</span> <span class="n">o2</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_torch</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">k2</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">o1</span><span class="p">,</span> <span class="n">o2</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_no_match</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span>
         <span class="n">distmat</span> <span class="o">=</span> <span class="n">dist_matrix</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">is_normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">dd12</span><span class="p">,</span> <span class="n">nn12</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">topk</span><span class="p">(</span><span class="n">distmat</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">largest</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># (n1, 2)</span>
 
